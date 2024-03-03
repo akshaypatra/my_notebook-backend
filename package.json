@@ -4,13 +4,14 @@
   "description": "MyNotebook- Your notebook on the cloud",
   "main": "index.js",
   "scripts": {
-    "start":"nodemon server.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
+    "express-validator": "^7.0.1",
     "mongoose": "^8.2.0"
   },
   "devDependencies": {
