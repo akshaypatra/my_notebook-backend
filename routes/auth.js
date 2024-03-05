@@ -3,6 +3,12 @@ const router=express.Router();
 const User=require('../models/User');
 const bcrypt = require('bcryptjs');
 const { query, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+
+
+
+//jwt secret
+const JWT_secret="akshayJwtSectret";
 
 //Create a User using : POST "api/auth/createuser" . No loginm required
 router.post('/createuser',[
@@ -46,11 +52,19 @@ router.post('/createuser',[
         password: secPass
     })
     
-    // .then(user => res.json(user)).catch(err=>{
-    //     console.log(err),
-    //     res.json({error:'Please enter a Unique Email',message:err.message})
-    // });
-    res.json(user);
+
+    const data={
+        user:{
+            id:user.id
+        }
+    }
+
+    //creating a token to give it to the user
+    const authToken=jwt.sign(data,JWT_secret);
+    // console.log(token);
+
+    // res.json(user);
+    res.json({authToken});
 
     //catch error if something happens
     } catch (error) {
