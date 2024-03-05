@@ -7,10 +7,14 @@ const jwt = require('jsonwebtoken');
 
 
 
+
 //jwt secret
 const JWT_secret="akshayJwtSectret";
 
-//Create a User using : POST "api/auth/createuser" . No loginm required
+//ENDPOINT 1: Create a User using : POST "api/auth/createuser" . No loginm required
+
+
+
 router.post('/createuser',[
     query('name','Enter a valid name').isLength({min:3}),
     // email must be an valid email
@@ -28,13 +32,10 @@ router.post('/createuser',[
     if (result.isEmpty()) {
         return res.status(400).json({ errors: result.array() });
     }
-    // console.log(req.body);
-    // const user=User(req.body);
-    // user.save();
     
+    //try catch block 
     try {
         
-
     //check whether the user with this email exists already
     let user=await User.findOne({email:req.body.email});
     
@@ -42,6 +43,7 @@ router.post('/createuser',[
         return res.status(400).json({error:"Sorry a user with this email already exist"})
     }
 
+    //using bcrypt hashing package to hash the password
     const salt=await bcrypt.genSalt(10);
     const secPass =await bcrypt.hash(req.body.password,salt);
 
@@ -69,9 +71,64 @@ router.post('/createuser',[
     //catch error if something happens
     } catch (error) {
         console.error(error.message);
-        res.status(500).send("Some error Occured")
+        res.status(500).send("Internal server Error!");
     }
     
 });
 
+
+
+//ENDPOINT 2: Authenticate the user : POST "api/auth/login" . No login required
+
+router.post('/login',[
+
+    //validating email and pasword 
+    query('email','Enter a valid email').isEmail(),
+    query('password','password cannot be blank').exists()
+
+],async(req,res)=>{
+
+    //If there are errors , return Bad request and the errors
+    const errors=validationResult(req);
+    if(errors.isEmpty()){
+        return res.status(400).json({errors:errors.array()});
+    }
+
+    //taking out email and password from request body
+    const {email,password}=req.body;
+
+    try {
+       
+        //finding a user from User Model
+        let user=await User.findOne({email});
+
+        //if user does not exist
+        if(!user){
+            return res.status(400).json({error:"Please try to login with correct Credentials"});
+        }
+
+        //comparing given  password with password in database
+        const passwordCompare=await bcrypt.compare(password,user.password);
+
+        if(!passwordCompare){
+            return res.status(400).json({error:"Please try to login with correct Credentials"});
+        }
+
+        //if password is correct ,send the data or payload  using jwt
+        const data={
+            user:{
+                id:user.id
+            }
+        }
+    
+        //creating a token to give it to the user
+        const authToken=jwt.sign(data,JWT_secret);
+        res.json({authToken});
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal server Error!");
+    }
+
+});
 module.exports=router
