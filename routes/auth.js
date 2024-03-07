@@ -4,7 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const { query, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
-const fetchuser=require('../middleware/fetchuser')
+const fetchuser=require('../middleware/fetchuser');
 
 
 //jwt secret
@@ -21,7 +21,7 @@ router.post(
     // password must be at least 5 chars long
     query("password", "password length should be more than 5").isLength({
       min: 5,
-    }),
+    })
   ],
   async (req, res) => {
     // Finds the validation errors in this request and wraps them in an object with handy functions
